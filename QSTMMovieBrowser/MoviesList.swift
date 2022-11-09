@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+class MoviesList: Codable {
+    enum CodingKeys: String, CodingKey {
+        case movies
+    }
+    
+    var movies: [Movie] = []
+}

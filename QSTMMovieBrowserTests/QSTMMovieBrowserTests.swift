@@ -9,28 +9,43 @@ import XCTest
 @testable import QSTMMovieBrowser
 
 class QSTMMovieBrowserTests: XCTestCase {
+    func testExtensions() {
+        let testDateString = "11 June 1997"
+        
+        var dateComponents = DateComponents()
+        dateComponents.year = 1997
+        dateComponents.month = 6
+        dateComponents.day = 11
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        let userCalendar = Calendar(identifier: .gregorian)
+        let testDateTime = userCalendar.date(from: dateComponents)
+        
+        let convertedDate = testDateString.stringToDate(format: "dd MMMM yyyy")
+        XCTAssert(testDateTime == convertedDate)
+        
+        let convertedDateString = convertedDate.dateToString(format: "dd MMMM yyyy")
+        XCTAssert(convertedDateString == testDateString)
     }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    
+    func testCodableObjectFactory() {
+        let sampleData = MovieListDummyData.dummyMovieList
+        guard let movieList: MoviesList = CodableObjectFactory.objectFromPayload(MovieListDummyData.dummyMovieList) else {
+            XCTFail()
+            return
         }
+        XCTAssert(movieList.movies.count > 0)
+        
+        let movieListVm = MovieListViewModel()
+        movieListVm.fetchMovies()
+        XCTAssert(movieListVm.movieList.movies.first!.title == "Tenet")
+        movieListVm.sortByTitle()
+        XCTAssert(movieListVm.movieList.movies.first!.title == "Avengers: Age of Ultron")
+        movieListVm.sortByReleaseDate()
+        XCTAssert(movieListVm.movieList.movies.first!.title == "Guardians of the Galaxy")
+        
+        let movieDetailsVm = MovieDetailsViewModel(movie: movieListVm.movieList.movies.first!)
+        movieDetailsVm.addToWatchList()
+        XCTAssert(movieDetailsVm.movie.onWatchlist == true)
     }
 
 }
